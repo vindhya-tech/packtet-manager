@@ -205,6 +205,21 @@ docker run --name nagiosdemo -p 8888:80 jasonrivers/nagios:latest
 http://localhost:8888
 Username: nagiosadmin
 Password: nagios
+docker exec -it nagiosdemo bash
+cd /opt/nagios/etc/servers
+nano myserver.cfg
+Add this host:
+define host {
+    use                     linux-server
+    host_name               myserver
+    alias                   My Test Server
+    address                 192.168.1.10
+}
+Save and exit.
+service nagios restart
+exit
+Now check in UI:
+Hosts → myserver → UP/DOWN status
 docker stop nagiosdemo
 docker rm nagiosdemo
 docker rmi jasonrivers/nagios:latest
@@ -247,6 +262,7 @@ sudo docker build -t mywebimage .
 sudo docker run -d -p 80:80 mywebimage
 sudo docker ps
 http://13.201.45.77
+
 
 
 
