@@ -227,8 +227,73 @@ pipeline {
         }
     }
 }
+***********scripted web
+node {
+    
+    stage('Clone Repository') {
+        git branch: 'main', url: 'https://github.com/vindhya-tech/labinternal-1.git'
+    }
 
-*************************
+    stage('Clean') {
+        bat "mvn clean"
+    }
+
+    stage('Install') {
+        bat "mvn install"
+    }
+
+    stage('Test') {
+        bat "mvn test"
+    }
+
+    stage('Package') {
+        bat "mvn package"
+    }
+
+    stage('Deploy') {
+        echo "Deploying WAR to Tomcat..."
+        bat 'copy /Y target\\*.war "C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\webapps\\"'
+    }
+
+    stage('Run Application') {
+        echo "Application deployed successfully!"
+    }
+}
+
+*************************scripted java
+node {
+
+    stage('Clone Repository') {
+        git branch: 'main', url: 'https://github.com/vindhya-tech/labinternal-1.git'
+    }
+
+    stage('Clean') {
+        bat 'mvn clean'
+    }
+
+    stage('Compile') {
+        bat 'mvn compile'
+    }
+
+    stage('Test') {
+        bat 'mvn test'
+    }
+
+    stage('Package') {
+        bat 'mvn package'
+    }
+
+    stage('Deploy to Tomcat') {
+        echo "Deploying WAR to Tomcat..."
+        bat 'copy /Y target\\*.war "C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\webapps\\"'
+    }
+
+    stage('Finish') {
+        echo "BUILD SUCCESS — Java project built and deployed!"
+    }
+}
+
+***********************
 pipeline {
     agent any
     
@@ -375,6 +440,178 @@ sudo docker run -d -p 80:80 mywebimage
 sudo docker ps
 http://13.201.45.77
 
+
+web_jenkins:
+Jenkins Dashboard → New Item
+Name: MavenWeb_Build
+Select Freestyle project
+Click OK
+✅ STEP 2 — Configure Git
+Inside the job:
+Description: Web Build demo
+Source Code Management → Git
+Paste your Maven Web project repo URL
+Branch: */main or */master
+✅ STEP 3 — Add Maven Build Steps
+Scroll to Build:
+🔹 Add Build Step → Invoke top-level Maven targets
+Maven version: MAVEN_HOME
+Goals: clean
+🔹 Add Build Step → Invoke top-level Maven targets
+Maven version: MAVEN_HOME
+Goals: install
+✅ STEP 4 — Add Post-build Action
+Add Archive the artifacts → Files: **/*
+Add Build other projects → Project: MavenWeb_Test
+Trigger: Only if build is stable
+STEP 5 — Create MavenWeb_Test Job
+
+Jenkins Dashboard → New Item
+
+Name: MavenWeb_Test
+
+Select → Freestyle project
+
+Click OK
+
+🔥 STEP 6 — Configure MavenWeb_Test
+
+Inside the job:
+
+Description: Test demo
+
+Scroll to Build Environment
+
+Tick: ✔ Delete workspace before build starts
+
+🔥 STEP 7 — Add Build Steps
+(A) Copy Artifacts
+
+Add build step → Copy artifacts from another project
+
+Project name:
+
+MavenWeb_Build
+
+
+Build selector → ✔ Stable build only
+
+Artifacts:
+
+**/*
+
+(B) Maven Test
+
+Add build step → Invoke top-level Maven targets
+
+Maven version: MAVEN_HOME
+
+Goals:
+
+test
+
+🔥 STEP 8 — Add Post-build Action
+
+Add Archive the artifacts
+
+Files:
+
+**/*
+
+
+Add Build other projects
+
+Project:
+
+MavenWeb_Deploy
+
+
+Trigger: ✔ Only if build is stable
+
+Click Save
+
+⭐ STEP 9 — Create MavenWeb_Deploy Job
+
+Jenkins Dashboard → New Item
+
+Name:
+
+MavenWeb_Deploy
+
+
+Choose Freestyle project
+
+Click OK
+
+⭐ STEP 10 — Configure MavenWeb_Deploy
+
+Inside the job:
+
+Description: Web Code Deployment
+
+Tick: ✔ Delete workspace before build starts
+
+⭐ STEP 11 — Copy Artifacts in Deploy Job
+
+Add build step → Copy artifacts from another project
+
+Project name:
+
+MavenWeb_Test
+
+
+Build selector → ✔ Stable build only
+
+Artifacts:
+
+**/*
+
+⭐ STEP 12 — Add Deployment (WAR to Tomcat)
+
+Go to Post-build Actions:
+
+Click: Deploy WAR/EAR to a container
+
+Fill these fields:
+WAR/EAR files
+**/*.war
+
+Context path
+/webpath
+
+Add Container
+
+Click Add container
+
+Choose:
+✔ Tomcat 9.x Remote
+
+Tomcat Details
+
+Credentials → Select your Tomcat admin user
+
+Tomcat URL:
+
+http://localhost:8085/
+
+Click Save
+⭐ STEP 13 — Run Full Web Pipeline
+Go to MavenWeb_Build
+Click Build Now
+It must automatically run:
+MavenWeb_Build → MavenWeb_Test → MavenWeb_Deploy
+All should be green.
+⭐ STEP 14 — Verify Deployment
+Open browser:
+http://localhost:8085/webpath
+You should see the deployed web app.
+⭐ STEP 15 — Create Web Pipeline View
+Jenkins Dashboard → click +
+Name:
+MavenWeb_Pipeline
+Select Build Pipeline View
+Initial job → MavenWeb_Build
+Save
 
 
 
