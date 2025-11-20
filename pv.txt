@@ -116,7 +116,119 @@ pipeline {
         }
     }
 }
-*******************************
+*******************************web appl
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: 'main', url: 'https://github.com/vindhya-tech/labinternal-1.git'
+            }
+        }
+
+        stage('Clean') {
+            steps {
+                bat 'mvn clean'
+            }
+        }
+
+        stage('Install') {
+            steps {
+                bat 'mvn install'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                bat 'mvn test'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                bat 'mvn package'
+            }
+        }
+
+       stage('Deploy') {
+    steps {
+        echo "Deploying application to Tomcat..."
+        bat 'copy /Y target\\*.war "C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\webapps\\"'
+    }
+}
+
+
+        stage('Run Application') {
+            steps {
+                echo "Application executed successfully!"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'BUILD SUCCESS'
+        }
+    }
+}
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: 'main', url: 'https://github.com/vindhya-tech/labinternal-1.git'
+            }
+        }
+
+        stage('Clean') {
+            steps {
+                bat 'mvn clean'
+            }
+        }
+
+        stage('Install') {
+            steps {
+                bat 'mvn install'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                bat 'mvn test'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                bat 'mvn package'
+            }
+        }
+
+       stage('Deploy') {
+    steps {
+        echo "Deploying application to Tomcat..."
+        bat 'copy /Y target\\*.war "C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\webapps\\"'
+    }
+}
+
+
+        stage('Run Application') {
+            steps {
+                echo "Application executed successfully!"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'BUILD SUCCESS'
+        }
+    }
+}
+
+*************************
 pipeline {
     agent any
     
@@ -262,6 +374,7 @@ sudo docker build -t mywebimage .
 sudo docker run -d -p 80:80 mywebimage
 sudo docker ps
 http://13.201.45.77
+
 
 
 
